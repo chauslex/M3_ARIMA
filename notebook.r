@@ -1,5 +1,11 @@
-install.packages('forecast')
-library('forecast')
+# Using automatically model-selected arima models to evaluate the
+# prediction error on the M3 contest. This uses the 'forecast' package.
+# To install it uncomment the two lines below or run them in your workspace.
+#
+# Author: Alex Susemihl 2015/05/26 (and Chris Häusler)
+#
+# install.packages('forecast')
+# library('forecast')
 
 # Automatically fits an ARIMA model based on BIC model selection and
 #  returns the model's absolute error on the last n data points which 
