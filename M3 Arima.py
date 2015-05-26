@@ -29,7 +29,7 @@ def mean_absolute_percentage_error(y_true, y_pred):
 # <codecell>
 
 
-def parse_line(line, n_predictions):
+def parse_line(line, n_predictions, normalize=False):
     line = line.split(',')
     n_samples = int(line[1])
     start_idx = 6
@@ -38,7 +38,15 @@ def parse_line(line, n_predictions):
     train_dat = np.array(line[start_idx:test_idx]).astype(np.float)
     test_dat = np.array(line[test_idx: end_idx]).astype(np.float)
 
-    return train_dat, test_dat
+    train_mean = None
+    train_std = None
+    if normalize:
+      train_mean = np.mean(train_dat)
+      train_std = np.std(train_dat)
+      train_dat = (train_dat - train_mean) / train_std
+      test_dat = (test_dat - train_mean) / train_std
+
+    return train_dat, test_dat, train_mean, train_std
 
 # <codecell>
 
@@ -46,7 +54,7 @@ def parse_line(line, n_predictions):
 def arima_predict(train_dat, n_predictions, p=2, d=0, q=0, params=None):
     arima = ARIMA(np.array(train_dat).astype(np.float), [p, d, q])
     diffed_logged_results = arima.fit(
-        trend='c',
+        trend='nc',
         disp=False,
         start_params=params,
         maxiter=2000)
@@ -74,7 +82,7 @@ def score_period(period, pred_values, true_values):
 
 # <codecell>
 
-model_params = {'p': 1, 'd': 0, 'q': 0}
+model_params = {'p': 4, 'd': 1, 'q': 1}
 
 periods = {'Month': {'n_predictions': 18,
                      'pred_values': [],
@@ -109,7 +117,7 @@ for period in periods.keys():
             elif i % 100 == 0:
                 print '{:4.0f} predictions in {:4.0f} seconds'.format(i, time() - start_dt)
 
-            train_dat, test_dat = parse_line(
+            train_dat, test_dat, mean, std = parse_line(
                 l, periods[period]['n_predictions'])
             periods[period]['true_values'].append(test_dat)
 
