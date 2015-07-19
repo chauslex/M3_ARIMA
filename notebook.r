@@ -16,7 +16,7 @@ auto_arima_prediction_error <- function(time_series, n = 18) {
   train_data <- time_series[1:train]
   test_data <- time_series[(train+1):len]
   predict <- forecast(auto.arima(train_data), h = n)$mean
-  return(abs(predict - test_data))
+  return(abs((predict - test_data)/test_data))
 }
 
 # Takes a list of vectors and return the average prediction error
@@ -25,7 +25,7 @@ auto_arima_prediction_error <- function(time_series, n = 18) {
 average_error_vector <- function(ts_list, n = 18) {
   errors <- matrix(nrow=length(ts_list), ncol=n)
   for (i in 1:length(ts_list)) {
-    errors[i,] <- auto_arima_error_vector(ts_list[[i]])
+    errors[i,] <- auto_arima_prediction_error(ts_list[[i]])
   }
   return(colMeans(errors))
 }
