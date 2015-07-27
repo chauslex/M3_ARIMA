@@ -12,7 +12,7 @@
 #  are held out from training
 auto_arima_prediction_error <- function(time_series, n = 18) {
   len <- length(time_series)
-  train <- len - 18
+  train <- len - n
   train_data <- time_series[1:train]
   test_data <- time_series[(train+1):len]
   predict <- forecast(auto.arima(train_data), h = n)$mean
@@ -25,7 +25,7 @@ auto_arima_prediction_error <- function(time_series, n = 18) {
 average_error_vector <- function(ts_list, n = 18) {
   errors <- matrix(nrow=length(ts_list), ncol=n)
   for (i in 1:length(ts_list)) {
-    errors[i,] <- auto_arima_error_vector(ts_list[[i]])
+    errors[i,] <- auto_arima_prediction_error(ts_list[[i]], n = n)
   }
   return(colMeans(errors))
 }
@@ -47,18 +47,18 @@ read_file <- function(filename) {
   return(l)
 }
 
-quart <- average_error_vector(read_file('Quart_M3C.csv'))
+quart <- average_error_vector(read_file('Quart_M3C.csv'), n = 8)
 print("Saving quart to quart_predict_error.csv")
 write.csv(quart, file="quart_predict_error.csv")
 
-year <- average_error_vector(read_file('Year_M3C.csv'))
+year <- average_error_vector(read_file('Year_M3C.csv'), n = 6)
 print("Saving year to year_predict_error.csv")
 write.csv(year, file="year_predict_error.csv")
 
-month <- average_error_vector(read_file('Month_M3C.csv'))
+month <- average_error_vector(read_file('Month_M3C.csv'), n = 18)
 print("Saving month to month_predict_error.csv")
 write.csv(month, file="month_predict_error.csv")
 
-other <- average_error_vector(read_file('Other_M3C.csv'))
+other <- average_error_vector(read_file('Other_M3C.csv'), n = 8)
 print("Saving other to other_predict_error.csv")
 write.csv(other, file="other_predict_error.csv")
